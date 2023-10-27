@@ -4,7 +4,7 @@ import numpy as np
 from IPython.core.display import clear_output
 
 from ea_operators import initialize, phenotypes, selection, crossover, mutation
-from ea_operators.fitness import calculate_fitness, scale_fitness
+from ea_operators.fitness import compute_fitness, scale_fitness
 from ea_utilities import objective_functions, visualize, save
 
 
@@ -26,6 +26,8 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
     population_fig = None
     stat_fig = None
     both_figs = None
+
+    function_evals = 0
 
     # fitness function
     objective_function = lambda x: \
@@ -50,16 +52,18 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
     for i in range(generations_count):
         # calculate fitness values
         (individuals, fitnesses) = \
-            calculate_fitness(
+            compute_fitness(
                 population, phenotypes.phenotype_simple_ga,
                 objective_function
             )
 
-        # compute statistics
-        fitness_bests[i], fitness_worsts[i], fitness_avgs[i] = \
-            np.max(fitnesses), np.min(fitnesses), np.mean(fitnesses)
+        function_evals += mu
 
-        if current_best_fitness < fitness_bests[i]:
+        # compute statistics
+        fitness_bests[i], fitness_worsts[i], fitness_avgs[i], fitness_best_index = \
+            np.max(fitnesses), np.min(fitnesses), np.mean(fitnesses), np.argmax(fitnesses)
+
+        if fitness_bests[i] > current_best_fitness:
             current_best_fitness = fitness_bests[i]
             current_best_population = population
             current_best_individuals = individuals
@@ -69,13 +73,17 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
             # draw population and fitness stats
             both_figs = visualize.draw_population_and_fitness_stats(
                 individuals, fitnesses, fitness_bests, fitness_avgs,
-                i + 1, current_best_fitness, both_figs
+                i + 1, current_best_fitness,
+                objective_function, 0, 2**chromosome_length - 1,
+                both_figs
             )
         else:
             # draw population only
             if do_draw_population:
                 population_fig = visualize.draw_population(
-                    individuals, fitnesses, i + 1, population_fig
+                    individuals, fitnesses, i + 1,
+                    objective_function, 0, 2**chromosome_length - 1,
+                    population_fig
                 )
 
             # draw fitness stats only
@@ -88,7 +96,9 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
         # print info as needed
         if do_print:
             visualize.report_ga_progress(
-                fitness_bests[i], fitness_worsts[i], fitness_avgs[i], i + 1,
+                fitness_bests[i], fitness_worsts[i], fitness_avgs[i],
+                individuals[fitness_best_index],
+                i + 1,
                 time.time() - start_time
             )
 
@@ -144,4 +154,5 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
                          current_best_fitnesses,
                          generation_final)
 
-    return current_best_population, current_best_individuals, current_best_fitnesses, generation_final, success
+    return current_best_population, current_best_individuals, current_best_fitnesses,\
+           generation_final, success, function_evals

@@ -6,7 +6,10 @@ def phenotype_simple_ga(population):
 
     # create a sequence of powers of two, in the correct order
     # (1 being the rightmost, and 2^{n - 1} being the leftmost)
-    powers = 2**np.arange(population.shape[1])[::-1]
+    if population.shape[1] > 31:
+        powers = 2**np.arange(population.shape[1], dtype=np.int64)[::-1]
+    else:
+        powers = 2**np.arange(population.shape[1])[::-1]
 
     # obtain the result as a (fast, hence @) dot product
     return population @ powers
@@ -18,7 +21,10 @@ def phenotype_real(population, a, b, nvar, bits_num):
 
     # create a sequence of powers of two, in the correct order
     # (1 being the rightmost, and 2^{n - 1} being the leftmost)
-    powers = 2 ** np.arange(bits_num)[::-1]
+    if bits_num > 31:
+        powers = 2**np.arange(bits_num, dtype=np.int64)[::-1]
+    else:
+        powers = 2**np.arange(bits_num)[::-1]
 
     # reshape the individuals matrix
     population_reshaped = population.reshape(-1, nvar, bits_num)

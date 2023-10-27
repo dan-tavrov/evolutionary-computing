@@ -4,10 +4,17 @@ import time
 from IPython.display import display
 
 
-def draw_population(individuals, fitnesses, generation, fig_handles=None):
+def draw_population(individuals, fitnesses, generation,
+                    function, left, right, fig_handles=None):
     if generation == 1:
         # if this is the first time we create this plot, we need to initialize it first
         fig, ax = plt.subplots()
+
+        # generate x values from 0 to 1
+        x = np.linspace(left, right, np.round((right - left) * 100).astype(int))
+
+        # draw the function itself
+        ax.plot(x, function(x), color='black')
 
         # create a scatter plot
         scatter = ax.scatter(individuals, fitnesses)
@@ -74,10 +81,18 @@ def draw_fitness_stats(fitness_bests, fitness_avgs, generation, current_max, fig
 
 def draw_population_and_fitness_stats(individuals, fitnesses,
                                       fitness_bests, fitness_avgs, generation,
-                                      current_max, fig_handles=None):
+                                      current_max,
+                                      function, left, right,
+                                      fig_handles=None):
     if generation == 1:
         # if this is the first time we create this plot, we need to initialize it first
         fig, (ax_pop, ax_stat) = plt.subplots(1, 2, figsize=(10, 4))
+
+        # generate x values from 0 to 1
+        x = np.linspace(left, right, np.round((right - left) * 100).astype(int))
+
+        # draw the function itself
+        ax_pop.plot(x, function(x), color='black')
 
         # create scatter plots
         scatter_pop = ax_pop.scatter(individuals, fitnesses)
@@ -117,7 +132,8 @@ def draw_population_and_fitness_stats(individuals, fitnesses,
     return fig, (ax_pop, ax_stat), scatter_pop, scatter_best, scatter_avg
 
 
-def report_ga_progress(fitness_best, fitness_worst, fitness_avg, generation, elapsed_time,
+def report_ga_progress(fitness_best, fitness_worst, fitness_avg, individual_best,
+                       generation, elapsed_time,
                        norm_diff_to_optimum=None):
     print('GENERATION {}'.format(generation))
 
@@ -125,11 +141,49 @@ def report_ga_progress(fitness_best, fitness_worst, fitness_avg, generation, ela
     seconds = elapsed_time - minutes * 60
     print('Time elapsed: {} minutes(s) and {} second(s).'.format(minutes, seconds))
 
-    print('Average fitness value --- {:.3f}'.format(fitness_avg))
-    print('Best fitness value --- {:.3f}'.format(fitness_best))
-    print('Worst fitness value --- {:.3f}'.format(fitness_worst))
+    print('Average fitness value --- {:.8f}'.format(fitness_avg))
+    print('Best fitness value --- {:.8f}'.format(fitness_best))
+    print('Worst fitness value --- {:.8f}'.format(fitness_worst))
 
     if norm_diff_to_optimum is not None:
-        print('Norm of the difference with the optimum value --- {:.3f'.format(norm_diff_to_optimum))
+        print('Norm of the difference with the optimum value --- {:.3f}'.format(norm_diff_to_optimum))
+
+    print('Best individual --- ', ["{:.8f} ".format(x) for x in individual_best])
 
     print('-'*15)
+
+
+def report_average_ga_progress(ga_function, T=10, random_seed=123,
+                               print_iteration_number=False, do_minimize=True):
+    best_fitnesses = np.zeros(T)
+    generation_finals = np.zeros(T)
+    successes = np.zeros(T)
+    function_evals = np.zeros(T)
+
+    np.random.seed(random_seed)
+
+    for i in range(T):
+        if print_iteration_number:
+            print(f"Iteration number {i+1}")
+
+        _, _, current_best_fitnesses,\
+        generation_finals[i], successes[i], function_evals[i] = ga_function()
+        if do_minimize:
+            best_fitnesses[i] = np.min(current_best_fitnesses)
+        else:
+            best_fitnesses[i] = np.max(current_best_fitnesses)
+
+    print(f"Total number of successes: {np.sum(successes)}")
+
+    print("Mean function evaluations: {:.3f}".format(np.mean(function_evals)))
+    print("Std of function evaluations: {:.3f}".format(np.std(function_evals, ddof=1)))
+
+    print("Mean final generation: {:.3f}".format(np.mean(generation_finals)))
+    print("Std of final generations: {:.3f}".format(np.std(generation_finals, ddof=1)))
+
+    print("Mean of best fitnesses: {:.8f}".format(np.mean(best_fitnesses)))
+    if do_minimize:
+        print("The best fitness ever: {:.8f}".format(np.min(best_fitnesses)))
+    else:
+        print("The best fitness ever: {:.8f}".format(np.max(best_fitnesses)))
+    print("")

@@ -85,7 +85,7 @@ def crossover_n_point(parents1, parents2, prob_crossover,
 
 # function that implements the uniform crossover for a GA
 def crossover_uniform(parents1, parents2, prob_crossover,
-                      return_meta_data=False, n=1):
+                      return_meta_data=False):
     if len(parents1.shape) == 1:
         parents1 = np.asmatrix(parents1)
         parents2 = np.asmatrix(parents2)
@@ -105,8 +105,8 @@ def crossover_uniform(parents1, parents2, prob_crossover,
     randoms = np.zeros_like(parents1)
     randoms[indices, :] = np.random.rand(len(indices), chromosome_length)
 
-    children1[indices, :] = np.where(randoms > 0.5, parents2[indices, :], parents1[indices, :])
-    children2[indices, :] = np.where(randoms > 0.5, parents1[indices, :], parents2[indices, :])
+    children1[indices, :] = np.where(randoms[indices, :] > 0.5, parents2[indices, :], parents1[indices, :])
+    children2[indices, :] = np.where(randoms[indices, :] > 0.5, parents1[indices, :], parents2[indices, :])
 
     if return_meta_data:
         return children1, children2, randoms, indices

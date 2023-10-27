@@ -3,7 +3,7 @@ import numpy as np
 
 # just a simple wrapper function that get the phenotypes for a given population
 # and calculates fitness values using a given objective function
-def calculate_fitness(population, phenotypes_function, objective_function):
+def compute_fitness(population, phenotypes_function, objective_function):
     individuals = phenotypes_function(population)
 
     # the function returns BOTH the individual phenotypes and the corresponding fitness values
@@ -35,3 +35,26 @@ def scale_fitness(fitnesses, c_m=2):
         b = (fitness_max - c_m * fitness_avg) * temp
 
     return a*fitnesses + b
+
+
+# a function to derate fitnesses, as used in EAs that implement sharing
+def derate_fitness(fitnesses, population, sigma_share):
+    # get the population size
+    mu = len(fitnesses)
+
+    # get chromosome size
+    l = population.shape[1]
+
+    shares = np.zeros(mu)
+
+    # calculate the sharing function for all individuals
+    for i in range(mu):
+        for j in range(mu):
+            dist = l - np.sum(population[i, ] == population[j, ])
+            share = 1 - dist/sigma_share
+
+            if share >= 0:
+                shares[i] += share
+
+    # derate fitness
+    return fitnesses / shares
