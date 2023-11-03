@@ -160,7 +160,7 @@ def ga(objective_function,
 
         # print info as needed
         if do_print:
-            visualize.report_ga_progress(
+            visualize.report_ea_progress(
                 fitness_bests[i], fitness_worsts[i], fitness_avgs[i],
                 individuals[fitness_best_index],
                 i + 1,
@@ -174,7 +174,7 @@ def ga(objective_function,
 
         # dump the population and its fitness values into a file
         if do_save:
-            save.save_to_csv(population, individuals, fitnesses, i + 1)
+            save.save_to_csv(population, fitnesses, i + 1)
 
         # if the solution has already been found, exit the program
         if norm_diff_to_optimum <= precision:
@@ -237,7 +237,6 @@ def ga(objective_function,
 
         # save the best results
         save.save_to_csv(current_best_population,
-                         current_best_individuals,
                          current_best_fitnesses,
                          generation_final)
 

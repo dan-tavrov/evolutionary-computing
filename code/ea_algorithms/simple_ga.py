@@ -95,7 +95,7 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
 
         # print info as needed
         if do_print:
-            visualize.report_ga_progress(
+            visualize.report_ea_progress(
                 fitness_bests[i], fitness_worsts[i], fitness_avgs[i],
                 individuals[fitness_best_index],
                 i + 1,
@@ -108,7 +108,7 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
 
         # dump the population and its fitness values into a file
         if do_save:
-            save.save_to_csv(population, individuals, fitnesses, i + 1)
+            save.save_to_csv(population, fitnesses, i + 1)
 
         # if the maximum fitness is already 1, exit the program
         if np.allclose(fitness_bests[i], 1, atol=1e-9):
@@ -150,7 +150,6 @@ def simple_ga(mu, chromosome_length, n, prob_crossover, prob_mutation,
 
         # save the best results
         save.save_to_csv(current_best_population,
-                         current_best_individuals,
                          current_best_fitnesses,
                          generation_final)
 

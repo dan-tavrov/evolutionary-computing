@@ -132,7 +132,7 @@ def draw_population_and_fitness_stats(individuals, fitnesses,
     return fig, (ax_pop, ax_stat), scatter_pop, scatter_best, scatter_avg
 
 
-def report_ga_progress(fitness_best, fitness_worst, fitness_avg, individual_best,
+def report_ea_progress(fitness_best, fitness_worst, fitness_avg, individual_best,
                        generation, elapsed_time,
                        norm_diff_to_optimum=None):
     print('GENERATION {}'.format(generation))
@@ -153,7 +153,7 @@ def report_ga_progress(fitness_best, fitness_worst, fitness_avg, individual_best
     print('-'*15)
 
 
-def report_average_ga_progress(ga_function, T=10, random_seed=123,
+def report_average_ea_progress(ea_function, T=10, random_seed=123,
                                print_iteration_number=False, do_minimize=True):
     best_fitnesses = np.zeros(T)
     generation_finals = np.zeros(T)
@@ -167,7 +167,7 @@ def report_average_ga_progress(ga_function, T=10, random_seed=123,
             print(f"Iteration number {i+1}")
 
         _, _, current_best_fitnesses,\
-        generation_finals[i], successes[i], function_evals[i] = ga_function()
+        generation_finals[i], successes[i], function_evals[i] = ea_function()
         if do_minimize:
             best_fitnesses[i] = np.min(current_best_fitnesses)
         else:

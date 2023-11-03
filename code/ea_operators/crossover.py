@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 # function that implements the one-point crossover for a simple GA
@@ -112,3 +113,29 @@ def crossover_uniform(parents1, parents2, prob_crossover,
         return children1, children2, randoms, indices
     else:
         return children1, children2
+
+
+# function that implements intermediate recombination for ES
+def recombination_intermediate(population, nvar):
+    # we need to take arithmetic average of everything
+    return np.mean(population, axis=0)
+
+
+# function that implements dominant recombination for object variables
+# and intermediate recombination for strategy parameters for ES
+def recombination_dominant_and_intermediate(population, nvar):
+    offspring = np.zeros(nvar)
+
+    # first, select two parents and perform dominant recombination
+    (mu, chromosome_length) = population.shape
+    parent_indices = random.sample(range(mu), 2)
+
+    # at random select genes from either parent
+    rands = np.random.rand(nvar)
+    parents = population[parent_indices, :nvar]
+
+    offspring[rands < 0.5] = parents[0, rands < 0.5]
+    offspring[rands >= 0.5] = parents[1, rands >= 0.5]
+
+    # second, perform intermediate recombination for strategy paremeters
+    return np.concatenate((offspring, np.mean(population[:, nvar:], axis=0)))
